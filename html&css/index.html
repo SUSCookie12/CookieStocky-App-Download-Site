@@ -19,6 +19,91 @@
 
 <!-- NOTICE: You can use the _analytics.html partial to include production code specific code & trackers -->
 
+<style>
+    .modern-button {
+        background-color: #4CAF50;
+        color: #ffffff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .modern-button:hover {
+        background-color: #3e8e41;
+    }
+
+    .button-wrapper {
+        text-align: center;
+        position: relative;
+    }
+
+    .spinner {
+        display: none;
+        position: absolute;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        border: 4px solid #4CAF50;
+        border-top: 4px solid #ffffff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .code-display {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        transition: opacity 0.5s;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .code-display.show {
+        opacity: 1;
+    }
+
+    #code {
+        font-family: monospace;
+        white-space: pre;
+        text-align: center;
+        font-size: 18px;
+    }
+
+    .copy-button {
+        background-color: transparent;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        padding: 5px 10px;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .copy-button:hover {
+        background-color: #3e8e41;
+    }
+
+    .copy-button i {
+        font-size: 16px;
+    }
+</style>
 </head>
 
 <body> 
@@ -45,8 +130,14 @@
                             Support
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="#activate" class="nav-link">
+                            Get a validation key
+                        </a>
+                    </li>
                 </ul>
             </div>
+            
             <div class="d-flex align-items-center">
                 <a href="download.html" class="btn btn-outline-soft d-none d-md-inline mr-md-3 animate-up-2">Free download</a>
                 <a href="https://www.mediafire.com/file/j4ad5x7lttdul9b/CookieStocky+App+Installer+(2)+(2).exe/file" target="_blank" class="btn btn-md btn-tertiary text-white d-none d-md-inline animate-up-2">Direct Download - Win11-x64<i class="fas fa-rocket ml-2"></i></a>
@@ -68,7 +159,7 @@
                         </h1>
                         <p class="footer py-5 pt-lg-6"></p>
                         <div>
-                            <a href="https://www.mediafire.com/file/j4ad5x7lttdul9b/CookieStocky+App+Installer+(2)+(2).exe/file" class="btn btn-dark btn-download-app mb-xl-0 mr-2 mr-md-3">
+                            <a href="https://www.mediafire.com/file/j4ad5x7lttdul9b/CookieStocky+App+Installer+(2)+(2).exe/file" target="_blank" class="btn btn-dark btn-download-app mb-xl-0 mr-2 mr-md-3">
                                 <span class="d-flex align-items-center">
                                     <span class="icon icon-brand mr-2 mr-md-3"><span class="fab fa-windows"></span></span>
                                     <span class="d-inline-block text-left">
@@ -90,7 +181,6 @@
                     <div class="col-12 col-md-10 justify-content-center">
                         <img class="d-none d-md-inline-block" src="./assets/img/illustrations/scene.svg" alt="Mobile App Mockup">
                     </div>
-                    
                 <div class="row" d-flex justify-content-center"></div>
                     <div class="col-12 col-md-6 col-lg-4 mb-4">
                         <div class="card border-light p-4">
@@ -108,10 +198,18 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                        <!--End of Accordion-->
+
+                    <div class="button-wrapper">
+                        <button id="getCodeButton" class="modern-button" onclick="getCode()">Get Code</button>
+                        <div id="spinner" class="spinner"></div>
                     </div>
-                </div>
+    
+                    <div id="codeDisplay" class="code-display">
+                        <p id="code"></p>
+                        <button id="copyButton" class="copy-button" onclick="copyCode()">
+                            <i class="fas fa-clone"></i>
+                        </button>
+                    </div>
             </div>
         </section>
         <div class="section bg-soft" id="download">
@@ -186,6 +284,45 @@
 <!-- Swipe JS -->
 <script src="./assets/js/swipe.js"></script>
 
-</body>
+<script>
+    async function getCode() {
+        const spinnerElement = document.getElementById('spinner');
+        const codeDisplayElement = document.getElementById('codeDisplay');
+        const codeElement = document.getElementById('code');
+        const getCodeButton = document.getElementById('getCodeButton');
+    
+        spinnerElement.style.display = 'block';
+        codeDisplayElement.style.opacity = 0;
+        codeElement.innerText = '';
+        getCodeButton.disabled = true;
+    
+        try {
+            const response = await fetch("https://script.google.com/macros/s/AKfycbwjIwxrrB2e6rw1veKN3NRubACC40ud6D0YqTGFCqE4QoocqsqOFNdIlxxLra3flPCg/exec" + "?timestamp=" + new Date().getTime());
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const code = await response.text();
+            if (!code) {
+                throw new Error('No code returned from script');
+            }
+            codeElement.innerText = code;
+            getCodeButton.innerText = 'Get Another Code';
+            codeDisplayElement.style.opacity = 1;
+        } catch (error) {
+            console.error('Error fetching code:', error);
+            codeElement.innerText = 'Error fetching code. Please try again.';
+            codeDisplayElement.style.opacity = 1;
+        } finally {
+            spinnerElement.style.display = 'none';
+            getCodeButton.disabled = false;
+        }
+    }
 
+    function copyCode() {
+        const codeElement = document.getElementById('code');
+        const codeText = codeElement.innerText;
+        navigator.clipboard.writeText(codeText);
+        alert('Code copied to clipboard!');
+    }
+</script>
 </html>
